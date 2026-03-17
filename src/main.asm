@@ -14,7 +14,8 @@ nametable_number: .res 1
 row_address: .res 2
 level_data: .res 2
 scroll_y: .res 1
-
+zp_screen_pointer: .res 2
+screen_counter: .res 1
 prep_next_row: .res 1
 
 row_number: .res 1
@@ -140,6 +141,12 @@ InitializeNametablesLoop:
   jsr LoadRow           ; draw first column of second nametable
 
 InitializeNametablesDone:
+
+  ldx #$00
+  lda ScreensLow, x
+  sta zp_screen_pointer
+  lda ScreensHigh, x
+  sta zp_screen_pointer+1
   
   ;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -164,6 +171,14 @@ mainloop:
   lda row_number
   cmp #15
   bne :+
+  ;;;
+  inc screen_counter
+  ldx screen_counter
+  lda ScreensLow, x
+  sta zp_screen_pointer
+  lda ScreensHigh, x
+  sta zp_screen_pointer+1
+  ;;;
   lda #0
   sta row_number
 :
@@ -174,12 +189,11 @@ mainloop:
   tay                   ; y now contains the address of the first element of the row we're interested in
   
   sta zp_scratch_0
-  sta zp_scratch_1
 
   ldx #$FF
 FillTopRowData:
   inx
-  lda Screen1, y
+  lda (zp_screen_pointer), y
   asl a
   tay
   lda MetatileTop, y
@@ -205,7 +219,7 @@ FillTopRowData:
 
 FillBottomRowData:
   inx
-  lda Screen1, y
+  lda (zp_screen_pointer), y
   asl a
   tay
   lda MetatileBottom, y
@@ -286,21 +300,21 @@ Screen1:
   .byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
 
 Screen2:
-  .byte $02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01
-  .byte $02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01
-  .byte $02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01
-  .byte $02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01
-  .byte $02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01
-  .byte $02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01
-  .byte $02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01
-  .byte $02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01
-  .byte $02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01
-  .byte $02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01
-  .byte $02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01
-  .byte $02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01
-  .byte $02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01
-  .byte $02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01
-  .byte $02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01,$02,$01
+  .byte $03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03
+  .byte $03,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+  .byte $03,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+  .byte $03,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03,$03,$03,$00,$00,$03
+  .byte $03,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03,$00,$00,$00,$03
+  .byte $03,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+  .byte $03,$00,$00,$02,$00,$02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$02
+  .byte $02,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+  .byte $03,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+  .byte $03,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+  .byte $03,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+  .byte $03,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+  .byte $03,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+  .byte $03,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+  .byte $03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03
 
 Screen3:
   .byte $03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03
@@ -370,9 +384,12 @@ Screen6:
   .byte $03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03
   .byte $03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03
 
-Screens:
-  .word Screen1,Screen2,Screen3,Screen1,Screen2,Screen3,Screen1,Screen2
-  .word Screen3,Screen1,Screen2,Screen3,Screen1,Screen2,Screen3,Screen2
+ScreensLow:
+  .byte <Screen1,<Screen2,<Screen3,<Screen1,<Screen2,<Screen3,<Screen1,<Screen2
+  .byte <Screen3,<Screen1,<Screen2,<Screen3,<Screen1,<Screen2,<Screen3,<Screen2
+ScreensHigh:
+  .byte >Screen1,>Screen2,>Screen3,>Screen1,>Screen2,>Screen3,>Screen1,>Screen2
+  .byte >Screen3,>Screen1,>Screen2,>Screen3,>Screen1,>Screen2,>Screen3,>Screen2
 
 RowHighNT0:
   .byte $20,$20,$20,$20,$20,$20,$20,$20,$21,$21,$21,$21,$21,$21,$21,$21,$22,$22,$22,$22,$22,$22,$22,$22,$23,$23,$23,$23,$23,$23

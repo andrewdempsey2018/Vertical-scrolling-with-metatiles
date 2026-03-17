@@ -37,10 +37,14 @@ clear_oam:
   lda #$FF
   sta row_number
   sta scroll_y
+  
 
   lda #$00
   sta zp_scratch_0
   sta zp_scratch_1
+  sta zp_screen_pointer
+  sta zp_screen_pointer+1
+  sta screen_counter
 
 vblankwait2:
   bit PPUSTATUS
