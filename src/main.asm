@@ -117,31 +117,41 @@ load_palettes:
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;InitializeNametables:
-;  lda #$02
-;  sta nametable_number
-;  lda #$00
-;  sta scroll_y
-;InitializeNametablesLoop:
-;  jsr LoadRow           ; draw bg column
-;  lda scroll_y          ; go to next column
-;  clc
-;  adc #$10
-;  sta scroll_y
-  
-;  lda scroll_y          ; calculate rown number based on scroll position
-;  lsr a
-;  lsr a
-;  lsr a                 ; repeat for first nametable 
-;  cmp #$1E
-;  bne InitializeNametablesLoop
-  
-;  lda #$00
-;  sta nametable_number
-;  sta scroll_y
-;  jsr LoadRow           ; draw first column of second nametable
+  lda #$02
+  ldx #$00
+FillRowData:
+  sta RowData, x
+  inx
+  cpx #$40
+  bne FillRowData
 
-;InitializeNametablesDone:
+
+InitializeNametables:
+  lda #$02
+  sta nametable_number
+  lda #$00
+  sta scroll_y
+InitializeNametablesLoop:
+  jsr LoadRow           ; draw bg column
+  lda scroll_y          ; go to next column
+  clc
+  adc #$10
+  sta scroll_y
+  
+  lda scroll_y          ; calculate rown number based on scroll position
+  lsr a
+  lsr a
+  lsr a                 ; repeat for first nametable 
+  cmp #$1E
+  bne InitializeNametablesLoop
+  
+  lda #$00
+  sta nametable_number
+  sta scroll_y
+  jsr LoadRow           ; draw first column of second nametable
+
+
+InitializeNametablesDone:
 
   ldx #$00
   lda ScreensLow, x

@@ -35,8 +35,10 @@ clear_oam:
   sta prep_next_row
 
   lda #$FF
-  sta row_number
   sta scroll_y
+
+  lda #$00
+  sta row_number
   
 
   lda #$00
