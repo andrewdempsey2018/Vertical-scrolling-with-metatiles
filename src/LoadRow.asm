@@ -6,7 +6,7 @@
   tya
   pha
 
-  lda scroll_y          ; calculate row number based on scroll position
+  lda scroll_y          ; there are 15 rows of meta tiles comprised of 30 rows of top tiles/bottom tiles
   lsr a
   lsr a
   lsr a
@@ -26,7 +26,7 @@ Nametable2:
   lda RowHighNT2, y
   sta row_address+1
 
-DrawTiles:           ; prep ppu for drawing tiles
+DrawTiles:              ; prep ppu for drawing tiles
   lda PPUSTATUS
   lda row_address + 1
   sta PPUADDR
@@ -43,12 +43,13 @@ DrawTilesLoop:
   bne DrawTilesLoop
 
   ;;;;;;;;;;
-  lda row_number
-  and #%00000001   ; isolate lowest bit
-  bne DontLoadAttrib       ; if result != 0 → odd
+  lda metatile_row_number
+  and #%00000001        ; isolate lowest bit
+  bne DontLoadAttrib    ; if result != 0 → odd
 
-  ldy row_number
-  lda TableAttribData, y         ; figure out what nametable to draw to
+  ldy metatile_row_number
+                        ; figure out what nametable to draw to
+  lda TableAttribData, y
   sta row_address
 
 
@@ -80,7 +81,6 @@ DrawAttribLoop:
   bne DrawAttribLoop
 
 DontLoadAttrib:
-  ;;;;;;;;;;
 
   pla                   ; restore registers
   tay

@@ -19,7 +19,7 @@ zp_screen_pointer: .res 2
 screen_counter: .res 1
 prep_next_row: .res 1
 
-row_number: .res 1
+metatile_row_number: .res 1
 
 ; ----------------------------------- ;
 ; scratch area
@@ -141,7 +141,7 @@ InitializeNametablesLoop:
   adc #$10
   sta scroll_y
   
-  lda scroll_y          ; calculate rown number based on scroll position
+  lda scroll_y          ; calculate row number based on scroll position
   lsr a
   lsr a
   lsr a                 ; repeat for first nametable 
@@ -186,8 +186,8 @@ mainloop:
   jmp Finished
 :
 
-  inc row_number
-  lda row_number
+  inc metatile_row_number
+  lda metatile_row_number
   cmp #15
   bne :+
   ;;;
@@ -199,13 +199,13 @@ mainloop:
   sta zp_screen_pointer+1
   ;;;
   lda #0
-  sta row_number
+  sta metatile_row_number
 :
   asl a
   asl a
   asl a
-  asl a                 ; multiply by 16
-  tay                   ; y now contains the address of the first element of the row we're interested in
+  asl a                 ; multiply by 16 (levels stored in rows of 15)
+  tay                   ; y now contains the address of the first element of the row of interest
   
   sta zp_scratch_0
 
@@ -227,12 +227,12 @@ FillTopRowData:
   bne FillTopRowData
 
   ;;;
-  lda row_number
+  lda metatile_row_number
   asl a
   asl a
   asl a
-  asl a                 ; multiply by 16
-  tay                   ; y now contains the address of the first element
+  asl a                 ; multiply by 16 (levels stored in rows of 15)
+  tay                   ; y now contains the address of the first element of the row of interest
   sta zp_scratch_0
   ;;;
 
@@ -253,10 +253,10 @@ FillBottomRowData:
   bne FillBottomRowData
 
                         ; load attributes if the row number is even (atributes only need to be loaded every second row as attributes cover a 32x32 area)
-  lda row_number
+  lda metatile_row_number
   and #%00000001        ; isolate lowest bit
   bne DontLoadAttrib    ; if result != 0 → odd
-  lda row_number
+  lda metatile_row_number
   lsr a                 ; divide by 2 (if row number=0 then a=0, if row number=2 then a=1, if row number=4 then a=2 etc... 
                         ; this ensures the correct index is available for the attributes tables which is set out in 8 rows)
 

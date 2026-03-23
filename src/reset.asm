@@ -38,7 +38,7 @@ clear_oam:
   sta scroll_y
 
   lda #$00
-  sta row_number
+  sta metatile_row_number
   
 
   lda #$00
