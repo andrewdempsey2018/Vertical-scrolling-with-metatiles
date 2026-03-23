@@ -6,7 +6,7 @@
   tya
   pha
 
-  lda scroll_y          ; calculate rown number based on scroll position
+  lda scroll_y          ; calculate row number based on scroll position
   lsr a
   lsr a
   lsr a
@@ -42,12 +42,45 @@ DrawTilesLoop:
   cmp #$40
   bne DrawTilesLoop
 
-;  ldx #$20              ; draw bottom half of 16x16 tiles
-;DrawBottomTilesLoop:
-;  lda #7
-;  sta PPUDATA
-;  dex
-;  bne DrawBottomTilesLoop
+  ;;;;;;;;;;
+  lda row_number
+  and #%00000001   ; isolate lowest bit
+  bne DontLoadAttrib       ; if result != 0 → odd
+
+  ldy row_number
+  lda TableAttribData, y         ; figure out what nametable to draw to
+  sta row_address
+
+
+  lda nametable_number
+  eor #$02              ; drawing to nametable that is currently offscreen
+  cmp #$00
+  bne Nametable2X
+  lda #$23
+  sta row_address+1
+  jmp LoadAttribs
+Nametable2X:
+  lda #$2B
+  sta row_address+1
+
+LoadAttribs:
+
+  lda PPUSTATUS
+  lda row_address + 1
+  sta PPUADDR
+  lda row_address
+  sta PPUADDR
+
+  ldx #$00              ; draw top half of 16x16 tiles
+DrawAttribLoop:
+  lda AttribData, x
+  sta PPUDATA
+  inx
+  cpx #$08
+  bne DrawAttribLoop
+
+DontLoadAttrib:
+  ;;;;;;;;;;
 
   pla                   ; restore registers
   tay
