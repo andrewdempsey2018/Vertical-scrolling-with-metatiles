@@ -1,11 +1,11 @@
 version	major=2,minor=0
 info	csym=0,file=9,lib=0,line=662,mod=1,scope=8,seg=9,span=580,sym=96,type=9
-file	id=0,name="src/main.asm",size=5920,mtime=0x69C1A95E,mod=0
+file	id=0,name="src/main.asm",size=5920,mtime=0x69C1AAA3,mod=0
 file	id=1,name="src/constants.inc",size=1058,mtime=0x6991DD70,mod=0
 file	id=2,name="src/header.inc",size=380,mtime=0x69A345D4,mod=0
 file	id=3,name="src/reset.asm",size=771,mtime=0x69C199E4,mod=0
 file	id=4,name="src/controllers.asm",size=484,mtime=0x66FB104C,mod=0
-file	id=5,name="src/LoadRow.asm",size=1754,mtime=0x69C1A95E,mod=0
+file	id=5,name="src/LoadRow.asm",size=1985,mtime=0x69C1AAA3,mod=0
 file	id=6,name="src/ClearOAM.asm",size=343,mtime=0x69A3F358,mod=0
 file	id=7,name="src/data.asm",size=16037,mtime=0x69C1922E,mod=0
 file	id=8,name="graphics.chr",size=8192,mtime=0x69997124,mod=0

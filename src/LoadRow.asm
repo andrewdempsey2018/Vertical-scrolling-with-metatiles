@@ -6,8 +6,8 @@
   tya
   pha
 
-  lda scroll_y          ; there are 15 rows of meta tiles comprised of 30 rows of top tiles/bottom tiles
-  lsr a
+  lda scroll_y          ; there are 15 rows of meta tiles comprised of 30 sub rows of top tiles/bottom tiles
+  lsr a                 ; divide scroll_y by 8  to determine which of the 30 sub rows to work with
   lsr a
   lsr a
   tay
@@ -44,8 +44,8 @@ DrawTilesLoop:
 
   ;;;;;;;;;;
   lda metatile_row_number
-  and #%00000001        ; isolate lowest bit
-  bne DontLoadAttrib    ; if result != 0 → odd
+  and #%00000001        ; if lowest bit is 1 then the number is odd, otherwise the number is even
+  bne DontLoadAttrib    ; only need to load attributes on even metatile row numbers as metawiles are 16x16 but attributes are 32x32
 
   ldy metatile_row_number
                         ; figure out what nametable to draw to
