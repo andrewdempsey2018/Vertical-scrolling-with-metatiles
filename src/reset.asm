@@ -34,7 +34,7 @@ clear_oam:
   sta level_data
   sta prep_next_row
 
-  lda #$FF
+  lda #240
   sta scroll_y
 
   lda #$00

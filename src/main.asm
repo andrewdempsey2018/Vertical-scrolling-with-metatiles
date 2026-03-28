@@ -52,11 +52,11 @@ AttribData: .res 8
   sta OAMDMA
   lda #$00
 
-  inc scroll_y
+  dec scroll_y
   lda scroll_y
-  cmp #240
+  cmp #255
   bne :+
-  lda #0
+  lda #239
   sta scroll_y
   lda nametable_number
   eor #$02
