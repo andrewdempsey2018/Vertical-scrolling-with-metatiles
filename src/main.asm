@@ -19,12 +19,12 @@ zp_screen_pointer: .res 2
 screen_counter: .res 1
 prep_next_row: .res 1
 
-metatile_row_number: .res 1
+row_number: .res 1
 
 ; ----------------------------------- ;
 ; scratch area
 zp_scratch_0: .res 1
-zp_scratch_1: .res 1
+zp_scratch_1: .res 2
 ; ----------------------------------- ;
 
 .segment "BSS"
@@ -52,11 +52,11 @@ AttribData: .res 8
   sta OAMDMA
   lda #$00
 
-  dec scroll_y
+  inc scroll_y
   lda scroll_y
-  cmp #255
+  cmp #240
   bne :+
-  lda #239
+  lda #0
   sta scroll_y
   lda nametable_number
   eor #$02
@@ -141,7 +141,7 @@ InitializeNametablesLoop:
   adc #$10
   sta scroll_y
   
-  lda scroll_y          ; calculate row number based on scroll position
+  lda scroll_y          ; calculate rown number based on scroll position
   lsr a
   lsr a
   lsr a                 ; repeat for first nametable 
@@ -186,26 +186,33 @@ mainloop:
   jmp Finished
 :
 
-  inc metatile_row_number
-  lda metatile_row_number
+  inc row_number
+  lda row_number
   cmp #15
   bne :+
   ;;;
   inc screen_counter
   ldx screen_counter
+
   lda ScreensLow, x
   sta zp_screen_pointer
   lda ScreensHigh, x
   sta zp_screen_pointer+1
+
+  lda AttribsLow, x
+  sta zp_scratch_1
+  lda AttribsHigh, x
+  sta zp_scratch_1+1
+
   ;;;
   lda #0
-  sta metatile_row_number
+  sta row_number
 :
   asl a
   asl a
   asl a
-  asl a                 ; multiply by 16 (levels stored in rows of 15)
-  tay                   ; y now contains the address of the first element of the row of interest
+  asl a                 ; multiply by 16
+  tay                   ; y now contains the address of the first element of the row we're interested in
   
   sta zp_scratch_0
 
@@ -227,12 +234,12 @@ FillTopRowData:
   bne FillTopRowData
 
   ;;;
-  lda metatile_row_number
+  lda row_number
   asl a
   asl a
   asl a
-  asl a                 ; multiply by 16 (levels stored in rows of 15)
-  tay                   ; y now contains the address of the first element of the row of interest
+  asl a                 ; multiply by 16
+  tay                   ; y now contains the address of the first element
   sta zp_scratch_0
   ;;;
 
@@ -253,10 +260,10 @@ FillBottomRowData:
   bne FillBottomRowData
 
                         ; load attributes if the row number is even (atributes only need to be loaded every second row as attributes cover a 32x32 area)
-  lda metatile_row_number
+  lda row_number
   and #%00000001        ; isolate lowest bit
   bne DontLoadAttrib    ; if result != 0 → odd
-  lda metatile_row_number
+  lda row_number
   lsr a                 ; divide by 2 (if row number=0 then a=0, if row number=2 then a=1, if row number=4 then a=2 etc... 
                         ; this ensures the correct index is available for the attributes tables which is set out in 8 rows)
 
@@ -267,7 +274,7 @@ FillBottomRowData:
   tay
   ldx #$00
 FillAttribs:
-  lda ScreenXAttrib, y
+  lda (zp_scratch_1), y
   sta AttribData, x
   iny
   inx

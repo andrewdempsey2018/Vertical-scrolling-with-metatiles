@@ -6,8 +6,8 @@
   tya
   pha
 
-  lda scroll_y          ; there are 15 rows of meta tiles comprised of 30 sub rows of top tiles/bottom tiles
-  lsr a                 ; divide scroll_y by 8  to determine which of the 30 sub rows to work with
+  lda scroll_y          ; calculate row number based on scroll position
+  lsr a
   lsr a
   lsr a
   tay
@@ -26,7 +26,7 @@ Nametable2:
   lda RowHighNT2, y
   sta row_address+1
 
-DrawTiles:              ; prep ppu for drawing tiles
+DrawTiles:           ; prep ppu for drawing tiles
   lda PPUSTATUS
   lda row_address + 1
   sta PPUADDR
@@ -43,13 +43,12 @@ DrawTilesLoop:
   bne DrawTilesLoop
 
   ;;;;;;;;;;
-  lda metatile_row_number
-  and #%00000001        ; if lowest bit is 1 then the number is odd, otherwise the number is even
-  bne DontLoadAttrib    ; only need to load attributes on even metatile row numbers as metawiles are 16x16 but attributes are 32x32
+  lda row_number
+  and #%00000001   ; isolate lowest bit
+  bne DontLoadAttrib       ; if result != 0 → odd
 
-  ldy metatile_row_number
-                        ; figure out what nametable to draw to
-  lda TableAttribData, y
+  ldy row_number
+  lda TableAttribData, y         ; figure out what nametable to draw to
   sta row_address
 
 
@@ -81,6 +80,7 @@ DrawAttribLoop:
   bne DrawAttribLoop
 
 DontLoadAttrib:
+  ;;;;;;;;;;
 
   pla                   ; restore registers
   tay

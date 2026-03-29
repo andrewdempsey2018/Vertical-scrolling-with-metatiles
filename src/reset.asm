@@ -34,11 +34,11 @@ clear_oam:
   sta level_data
   sta prep_next_row
 
-  lda #240
+  lda #$FF
   sta scroll_y
 
   lda #$00
-  sta metatile_row_number
+  sta row_number
   
 
   lda #$00
